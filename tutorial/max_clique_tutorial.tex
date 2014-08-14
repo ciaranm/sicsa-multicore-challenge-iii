@@ -1,0 +1,646 @@
+% vim: set spell spelllang=en tw=100 et sw=4 sts=4 :
+
+\documentclass[a4paper]{article}
+
+\usepackage[inner=1in,outer=1in,top=1in,bottom=1.4in]{geometry}
+\usepackage{microtype}                 % the pretty
+\usepackage{titlesec}                  % muck around with titles
+\usepackage{caption}
+\usepackage{complexity}                % \P, \NP etc
+\usepackage{varioref}                  % \vref
+\usepackage{hyperref}                  % clicky links
+\usepackage{cleveref}                  % no need to type Figure etc
+\usepackage{tikz}                      % For pretty pictures
+\usepackage{amsmath}                   % \text
+\usepackage{wrapfig}                   % wrapping figures
+\usepackage{pdflscape}
+\usepackage[space]{cite}
+\usepackage{enumitem}
+\usepackage{afterpage}                 % \afterpage
+\usepackage{placeins}                  % \FloatBarrier
+\usepackage[ruled,vlined]{algorithm2e} % algorithms
+
+\usetikzlibrary{arrows, shadows, calc, positioning, decorations, decorations.pathmorphing,
+    decorations.pathreplacing, patterns, tikzmark, fit}
+
+% cref style
+\crefname{figure}{Figure}{Figures}
+\Crefname{figure}{Figure}{Figures}
+\crefname{table}{Table}{Tables}
+\Crefname{table}{Table}{Tables}
+\crefname{part}{Part}{Parts}
+\Crefname{part}{Part}{Parts}
+\crefname{section}{Section}{Sections}
+\Crefname{section}{Section}{Sections}
+\crefname{algocf}{algorithm}{algorithms}
+\Crefname{algocf}{Algorithm}{Algorithms}
+
+% captions
+\captionsetup[figure]{labelfont=bf}
+
+\setlength{\belowcaptionskip}{6pt}
+
+% titles
+\newlength\marginnumberslen
+\setlength\marginnumberslen{\dimexpr\oddsidemargin+0.4in+\hoffset\relax}
+
+\titleformat{name=\section}{\normalfont\Large\bfseries}{\llap{\hspace*{-\marginnumberslen}\thesection\hfill}}{0em}{}[{\vspace*{-\baselineskip}\medskip\hspace*{-\marginnumberslen}\textcolor{safelightgrey}{\titlerule}}]
+
+\titleformat{name=\subsection}{\normalfont\large\bfseries}{\llap{\hspace*{-\marginnumberslen}\thesubsection\hfill}}{0em}{}[{\vspace*{-\baselineskip}\medskip\hspace*{-\marginnumberslen}\textcolor{safenearlywhite}{\titlerule}}]
+
+
+% bibliography
+\makeatletter
+\let\old@biblabel\@biblabel
+\def\@biblabel#1{\llap{\hspace*{-\marginnumberslen}\old@biblabel{#1}\hfill}}%
+
+\let\orig@thebibliography\thebibliography
+\renewcommand{\thebibliography}{\labelsep=\z@ \leftmargin=\z@ \orig@thebibliography}
+\makeatother
+
+% colours
+\definecolor{safelightblue}{rgb}{0.65098, 0.807843, 0.890196}
+\definecolor{safedarkblue}{rgb}{0.121569, 0.470588, 0.705882}
+\definecolor{safeverylightblue}{rgb}{0.857843, 0.931961, 0.996078}
+\definecolor{safeverydarkblue}{rgb}{0.007843, 0.219608, 0.345098}
+\definecolor{safelightorange}{rgb}{0.996078, 0.931961, 0.857843}
+\definecolor{safelightgreen}{rgb}{0.698039, 0.87451, 0.541176}
+\definecolor{safemediumorange}{rgb}{0.74902, 0.505882, 0.490196}
+\definecolor{safelightgreen}{rgb}{0.698039, 0.87451, 0.541176}
+\definecolor{safedarkgreen}{rgb}{0.2, 0.627451, 0.172549}
+\definecolor{safepurple}{rgb}{0.458824, 0.439216, 0.701961}
+\definecolor{safedarkorange}{rgb}{0.34902, 0.176471, 0.015686}
+\definecolor{safelightgrey}{rgb}{0.7, 0.7, 0.7}
+\definecolor{safenearlywhite}{rgb}{0.9, 0.9, 0.9}
+\definecolor{safereallynearlywhite}{rgb}{0.93, 0.93, 0.93}
+
+% showframe haxx
+\makeatletter
+\def\Gm@hrule{\color{safereallynearlywhite}\hrule height 0.2pt depth\z@ width\textwidth}
+\def\Gm@hruled{}
+\newcommand*{\gmshow@textheight}{\textheight}
+\newdimen\gmshow@@textheight
+\g@addto@macro\landscape{\gmshow@@textheight=\hsize\renewcommand*{\gmshow@textheight}{\gmshow@@textheight}}
+\def\Gm@vrule{\color{safereallynearlywhite}\vrule width 0.2pt height\gmshow@textheight depth\z@}
+\makeatother
+
+% drawing styles
+\tikzset{vertex/.style={draw, circle, inner sep=0pt, minimum size=0.5cm, font=\small\bfseries}}
+\tikzset{notvertex/.style={vertex, color=white, text=black}}
+\tikzset{plainvertex/.style={vertex}}
+\tikzset{selectedvertex/.style={vertex, fill=safedarkblue}}
+\tikzset{delvertex/.style={vertex, dotted, color=safelightgrey}}
+\tikzset{vertexc1/.style={vertex, fill=safelightblue}}
+\tikzset{vertexc2/.style={vertex, fill=safedarkblue, text=safenearlywhite}}
+\tikzset{vertexc3/.style={vertex, fill=safelightorange}}
+\tikzset{vertexc4/.style={vertex, fill=safedarkorange, text=safenearlywhite}}
+\tikzset{vertexc5/.style={vertex, fill=safedarkgreen}}
+
+\tikzset{edge/.style={color=safelightgrey}}
+\tikzset{bedge/.style={ultra thick}}
+\tikzset{deledge/.style={dotted, color=safelightgrey}}
+\tikzset{edgel1/.style={color=safeverydarkblue}}
+\tikzset{edgel2/.style={color=safemediumorange}}
+\tikzset{edgel3/.style={ultra thick, color=safedarkblue}}
+\tikzset{edgel4/.style={ultra thick, color=safelightorange}}
+
+\tikzset{processarrow/.style={->, very thick, decorate, decoration={snake, post length=0.5mm}}}
+\tikzset{brace/.style={decorate, decoration={brace}, thick}}
+\tikzset{bracem/.style={decorate, decoration={brace, mirror}, thick}}
+\tikzset{label/.style={font=\small}}
+
+% Use these colours to replace the obnoxious defaults used for links in PDFs
+\hypersetup{
+    colorlinks,
+    citecolor=safedarkgreen,
+    linkcolor=safedarkblue,
+    urlcolor=safepurple}
+
+% \input isn't expandable. yay.
+\makeatletter\newcommand*\inputhaxx[1]{\@@input #1}\makeatother
+
+% notation
+\newcommand{\vertexset}{V}
+\newcommand{\edgeset}{E}
+\newcommand{\neighbourhood}{N}
+\newcommand{\modularproduct}{\operatorname{\triangledown}}
+\newcommand{\graphcomplement}[1]{\shortoverline{#1}}
+\newcommand{\Aut}[1]{\operatorname{Aut}{#1}}
+\newcommand{\End}[1]{\operatorname{End}{#1}}
+\newcommand{\compose}{\circ}
+\newcommand{\inverse}{^{-1}}
+
+\newcommand{\Cbest}{C^\star}
+\newcommand{\Lbest}{L^\star}
+\newcommand{\first}{\mathit{first}}
+\newcommand{\bounds}{\mathit{bounds}}
+\newcommand{\budget}{\mathit{budget}}
+\newcommand{\order}{\mathit{order}}
+\newcommand{\colour}{\mathit{colour}}
+\newcommand{\clique}{\mathit{clique}}
+\newcommand{\uncoloured}{\mathit{uncoloured}}
+\newcommand{\remaining}{\mathit{remaining}}
+\newcommand{\colourable}{\mathit{colourable}}
+\newcommand{\cliqueable}{\mathit{cliqueable}}
+\newcommand{\singletons}{\mathit{singletons}}
+\newcommand{\expand}{\FuncSty{expand}}
+\newcommand{\colourOrder}{\FuncSty{colourOrder}}
+\newcommand{\colourOrderDefer}{\FuncSty{colourOrderDefer}}
+\newcommand{\cliquePartitionDeferOrder}{\FuncSty{cliquePartitionDeferOrder}}
+\newcommand{\vrej}{v_{\mathit{rej}}}
+\newcommand{\kwunset}{\KwSty{unset}}
+
+\newcommand{\mclabel}[1]{\label{line:mc:#1}}
+\newcommand{\mcline}[1]{line~\ref{line:mc:#1}}
+\newcommand{\mclinerange}[2]{lines~\ref{line:mc:#1} to~\ref{line:mc:#2}}
+\newcommand{\mcmark}[1]{\tikzmark{mark:mc:#1}}
+
+\makeatletter
+\def\blfootnote{\xdef\@thefnmark{}\@footnotetext}
+\makeatother
+
+\title{Algorithms for the Maximum Clique Problem, \\ and How to Parallelise Them}
+
+\author{
+    Ciaran McCreesh%
+    \\ \href{mailto:c.mccreesh.1@research.gla.ac.uk}{\nolinkurl{c.mccreesh.1@research.gla.ac.uk}}
+}
+
+\begin{document}
+
+\makeatletter
+\vspace*{1cm}\noindent{\centering\Large\bfseries \@title \par}
+\vspace*{1cm}\noindent{\centering \@author \par}
+\vspace*{0.5cm}\noindent{\centering \@date \par}
+\vspace*{0.5cm}
+\makeatother
+
+\blfootnote{Parts of this text and the associated figures are based upon material which has
+previously been published or submitted for publication
+\cite{McCreesh:2014.labelled,McCreesh:2014.reorder,McCreesh:2014.parallel}.}
+
+\section{Introduction}
+
+\begingroup\setlength\intextsep{0pt}% hack for fixing space above the figure.
+\begin{wrapfigure}{R}{0.4\textwidth}
+    \centering
+    \begin{tikzpicture}
+        \newcount \myc
+        \foreach \n in {1, ..., 8}{
+            \myc=\n \advance\myc by -1 \multiply\myc by -360 \divide\myc by 8 \advance\myc by 90
+            \advance\myc by 22.5
+            \ifthenelse{\n = 1 \OR \n = 4 \OR \n = 6 \OR \n = 7}{
+                \node[selectedvertex] (N\n) at (\the\myc:1.25) {\n};
+            }{
+                \node[vertex] (N\n) at (\the\myc:1.25) {\n};
+            }
+        }
+
+        \draw [edge] (N1) -- (N2);
+        \draw [edge] (N1) -- (N3);
+        \draw [edge] (N1) -- (N8);
+        \draw [edge] (N2) -- (N3);
+        \draw [edge] (N2) -- (N7);
+        \draw [edge] (N3) -- (N5);
+        \draw [edge] (N3) -- (N6);
+        \draw [edge] (N4) -- (N5);
+        \draw [edge] (N5) -- (N8);
+
+        \draw [bedge] (N1) -- (N4);
+        \draw [bedge] (N1) -- (N6);
+        \draw [bedge] (N1) -- (N7);
+        \draw [bedge] (N4) -- (N6);
+        \draw [bedge] (N4) -- (N7);
+        \draw [bedge] (N6) -- (N7);
+    \end{tikzpicture}
+    \caption{A graph, with its maximum clique $\{1, 4, 6, 7\}$ shown.}
+    \label{figure:maxclique}
+\end{wrapfigure}
+
+A \emph{clique} in a graph is a subset of vertices, where every vertex in the set is adjacent to
+every other in the set (this can be thought of as a collection of people, all of whom know each
+other). We illustrate this in \cref{figure:maxclique}. Finding the largest clique in a given graph
+is the \emph{maximum clique problem}. Applications include biochemistry
+\cite{Butenko:2006,Eblen:2011,Eblen:2012,Depolli:2013}, control of autonomous vehicles
+\cite{Regula:2013}, coding and communications theory \cite{Bomze:1999}, document search
+\cite{Okubo:2006} and computer vision \cite{Pelillo:1998}.
+
+An \emph{independent set} is a subset of vertices, where no two vertices in the set are
+adjacent---in other words, it is a clique in the complement graph. We will discuss maximum clique
+here rather than maximum independent set, because there is a large set of standard benchmark
+instances that are formulated as clique problems. (The minimum vertex cover problem is also
+equivalent.)
+
+The maximum clique and maximum independent set problems are \NP-hard \cite{Garey:1979}. However,
+there are practical exact algorithms which work on a wide range of inputs in a reasonable amount of
+time. We describe a slightly simplified version of a widely used algorithm for the maximum clique
+problem, and discuss how it may be parallelised. This is \emph{not} a full discussion of the
+state-of-the-art in maximum clique solving or a full literature review---we believe that what we
+present here it is close enough to be an interesting and fair problem, but not too complicated to
+make implementations unrealistically challenging.
+
+\endgroup % hack for fixing space above the figure
+
+\section{A Branch and Bound Algorithm}
+
+In \vref{algorithm:maxClique} we present a basic branch and bound algorithm for the maximum clique
+problem. This is a simplification of a series of algorithms due to Tomita et al.\
+\cite{Tomita:2003,Tomita:2007,Tomita:2010}. We refer to a computational study by Prosser
+\cite{Prosser:2012} for a comparison of these algorithms; what we describe initially is Prosser's
+``MCSa1'' variation.
+
+\paragraph{Branching} Let $v$ be some vertex in our graph. Any clique either contains only
+$v$ and possibly some vertices adjacent to $v$, or does not contain $v$. Thus we may build up
+potential solutions by recursively selecting a vertex, and branching on whether or not to include
+it. We store our growing clique in a variable $C$, and vertices which may potentially be added to
+$C$ are stored in a variable $P$.  Initially $C$ is empty, and $P$ contains every vertex
+(\mcline{initial}).
+
+The $\expand$ function is our main recursive procedure. Inside a loop
+(\mclinerange{loopstart}{loopend}), we select a vertex $v$ from $P$ (\mcline{v}). First we consider
+including $v$ in $C$ (\mclinerange{vinstart}{vinend}). We produce a new $P'$ from $P$ by rejecting
+any vertices which are not adjacent to $v$ (\mcline{pprime})---this is sufficient to ensure that
+$P'$ contains only vertices adjacent to \emph{every} vertex in $C$. If $P'$ is not empty, we may
+potentially grow $C$ further, and so we recurse (\mcline{recurse}).  Having considered $v$ being in
+the clique, we then reject $v$ (\mclinerange{vnotinstart}{vnotinend}) and repeat.
+
+\paragraph{Bounding} Now we discuss a bound.  If we can colour a graph using $k$ colours, giving
+adjacent vertices different colours, then we know that the graph cannot contain a clique of size
+greater than $k$ (each vertex in a clique must be given a different colour---see
+\cref{figure:colour}). This gives us a bound on how much further $C$ could grow, using only the
+vertices remaining in $P$. To make use of this bound, we keep track of the largest feasible solution
+we have found so far (called the \emph{incumbent}), which we store in $\Cbest$. Initially $\Cbest$
+is empty (\mcline{cbest}).  Whenever we find a new feasible solution, we compare it with $\Cbest$,
+and if it is larger, we unseat the incumbent (\mcline{unseat}).
+
+\begin{wrapfigure}{R}{0.4\textwidth}
+    \centering
+    \begin{tikzpicture}
+        \newcount \myc
+        \foreach \n in {1, ..., 8}{
+            \myc=\n \advance\myc by -1 \multiply\myc by -360 \divide\myc by 8 \advance\myc by 90
+            \advance\myc by 22.5
+            \ifthenelse{\n = 1 \OR \n = 5}{
+                \node[vertexc1] (N\n) at (\the\myc:1.25) {\n};
+            }{}
+
+            \ifthenelse{\n = 2 \OR \n = 6 \OR \n = 8}{
+                \node[vertexc2] (N\n) at (\the\myc:1.25) {\n};
+            }
+
+            \ifthenelse{\n = 3 \OR \n = 4}{
+                \node[vertexc3] (N\n) at (\the\myc:1.25) {\n};
+            }
+
+            \ifthenelse{\n = 7}{
+                \node[vertexc4] (N\n) at (\the\myc:1.25) {\n};
+            }
+        }
+
+        \draw [edge] (N1) -- (N2);
+        \draw [edge] (N1) -- (N3);
+        \draw [edge] (N1) -- (N8);
+        \draw [edge] (N2) -- (N3);
+        \draw [edge] (N2) -- (N7);
+        \draw [edge] (N3) -- (N5);
+        \draw [edge] (N3) -- (N6);
+        \draw [edge] (N4) -- (N5);
+        \draw [edge] (N5) -- (N8);
+
+        \draw [bedge] (N1) -- (N4);
+        \draw [bedge] (N1) -- (N6);
+        \draw [bedge] (N1) -- (N7);
+        \draw [bedge] (N4) -- (N6);
+        \draw [bedge] (N4) -- (N7);
+        \draw [bedge] (N6) -- (N7);
+    \end{tikzpicture}
+    \caption{The relationship between cliques and colouring: each vertex in any clique must have a
+    different colour.}
+    \label{figure:colour}
+\end{wrapfigure}
+
+For each recursive call, we produce a constructive colouring of the vertices in $P$
+(\mcline{colour}), using the $\colourOrder$ function. This process produces an array $\order$ which
+contains a permutation of the vertices in $P$, and an array of bounds, $\bounds$, in such a way that
+the subgraph induced by the first $i$ vertices of $\order$ may be coloured using $\bounds[i]$
+colours. The $\bounds$ array is non-decreasing ($\bounds[i + 1] \ge \bounds[i]$), so if we iterate
+over $\order$ from right to left, we can avoid having to produce a new colouring for each choice of
+$v$. We make use of the bound on \mcline{bound}: if the size of the growing clique plus the number
+of colours used to colour the vertices remaining in $P$ is not enough to unseat the incumbent, we
+abandon search and backtrack.
+
+The $\colourOrder$ function performs a simple greedy colouring. We select a vertex (\mcline{cv}) and
+give it the current colour (\mcline{cgive}). This step is repeated until no more vertices may be
+given the current colour without causing a conflict (\mclinerange{cloopstart}{cloopend}). We then
+proceed with a new colour (\mcline{cnewcolour}) until every vertex has been coloured
+(\mclinerange{cloopoutstart}{cloopoutend}). Vertices are placed into the $\order$ array in the order
+in which they were coloured, and the $i$th entry of the $\bounds$ array contains the number of
+colours used at the time the $i$th vertex in $\order$ was coloured. This process is illustrated in
+\vref{figure:colourOrder}.
+
+\paragraph{Initial Vertex Orderings} The order in which vertices are coloured can have a substantial
+effect upon the colouring produced.  Here we will select vertices in a static non-increasing degree
+order, tie-breaking on vertex number (for reproducibility). This is done by permuting the graph at
+the top of search (\mcline{permute}), so vertices are simply coloured in numerical order. This
+assists with the bitset encoding, which we discuss below.
+
+\section{Bit Parallelism}
+
+For the maximum clique problem, San Segundo et al.\ \cite{SanSegundo:2011,SanSegundo:2013} observed
+that using a bitset encoding for SIMD-like local parallelism could speed up an implementation by a
+factor of between two to twenty, without changing the steps taken. This is done as follows: $P$
+should be a bitset, and the graph should be represented using an adjacency bitset for each vertex
+(this representation may be created when $G$ is permuted, on \mcline{permute}). Then \mcline{pprime}
+is simply a bitwise-and operation, behaving like intersection.
+
+Most importantly, the $\uncoloured$ and $\colourable$ variables in $\colourOrder$ are also bitsets,
+and the filtering on \mcline{removeadjacent} is simply a bitwise and-with-complement operation.
+Find the first vertex in $\colourable$ on line \mcline{cv} is provided as a dedicated instruction in
+modern hardware.
+
+Note that $C$ should not be stored as a bitset. Instead, it should be an array. Adding a vertex to
+$C$ on \mcline{vtoc} may be done by appending to the array, and when removing a vertex from $C$ on
+\mcline{vfromc} we simply remove the last element---this works because $C$ is used like a stack.
+
+\begin{algorithm}[p]\DontPrintSemicolon
+    \begin{tikzpicture}[overlay, remember picture]
+        \coordinate (accept1) at ({$(pic cs:mark:mc:bracesright)+(1, 0)$}|-{$(pic cs:mark:mc:accept1)+(0,-0.1)$});
+        \coordinate (accept2) at ({$(pic cs:mark:mc:bracesright)+(1, 0)$}|-{$(pic cs:mark:mc:accept2)$});
+        \coordinate (acceptt) at ($(accept1)!0.5!(accept2)$);
+        \draw [brace] (accept1) -- (accept2);
+        \node [right = 0.2 of acceptt] { accept $v$ };
+
+        \coordinate (reject1) at ({$(pic cs:mark:mc:bracesright)+(1, 0)$}|-{$(pic cs:mark:mc:reject1)+(0,-0.1)$});
+        \coordinate (reject2) at ({$(pic cs:mark:mc:bracesright)+(1, 0)$}|-{$(pic cs:mark:mc:reject2)$});
+        \coordinate (rejectt) at ($(reject1)!0.5!(reject2)$);
+        \draw [brace] (reject1) -- (reject2);
+        \node [right = 0.2 of rejectt] { reject $v$ };
+    \end{tikzpicture}
+
+    \nl $\FuncSty{maximumClique}$ :: (Graph $G$) $\rightarrow$ Vertex Set \;
+    \nl \Begin{
+        \nl permute $G$ so that vertices are in non-increasing degree order, tie-breaking on vertex number\mclabel{permute} \;
+        \nl $\KwSty{global}$ $\Cbest$ $\gets$ $\emptyset$ \mclabel{cbest} \;
+        \nl $\expand$($\emptyset$, $\vertexset(G)$) \mclabel{initial} \;
+        \nl $\KwSty{return}$ $\Cbest$ (unpermuted) \;
+    }
+    \;
+
+    \nl $\expand$ :: (Vertex Set $C$, Vertex Set $P$) \;
+    \nl \Begin{
+        \nl ($\order$, $\bounds$) $\gets$ $\colourOrder$($P$) \mclabel{colour} \;
+        \nl \For{$i$ $\gets$ $|P|$ $\KwSty{downto}$ 1\mclabel{loopstart}}{
+            \nl \lIf{\textnormal{$|C|$ + $\bounds[i]$ $\le$ $|\Cbest|$}\mclabel{bound}}{$\KwSty{return}$}
+            \nl $v$ $\gets$ $\order[i]$ \mclabel{v} \mcmark{accept1} \;
+            \nl add $v$ to $C$ \mclabel{vinstart} \mclabel{vtoc} \;
+            \nl \lIf{\textnormal{$|C| > |\Cbest|$}}{$\Cbest$ $\gets$ $C$\mclabel{unseat}}
+            \nl $P'$ $\gets$ the vertices in $P$ that are adjacent to $v$ \mclabel{pprime} \mcmark{bracesright} \;
+            \nl \lIf{$P'$ $\ne$ $\emptyset$}{$\expand$($C$, $P'$) \mclabel{recurse} \mcmark{accept2} \mcmark{reject1}} \mclabel{vinend}
+            \nl remove $v$ from $C$ \mclabel{vnotinstart} \mclabel{vfromc} \;
+            \nl remove $v$ from $P$ \mclabel{vnotinend} \mclabel{loopend} \mcmark{reject2} \;
+        }
+    }
+    \;
+
+    \nl $\colourOrder$ :: (Vertex Set $P$) $\rightarrow$ (Vertex Array, Int Array) \;
+    \nl \Begin{
+        \nl ($\order$, $\bounds$) $\gets$ ($[]$, $[]$) \;
+        \nl $\uncoloured$ $\gets$ $P$ \;
+        \nl $\colour$ $\gets$ $1$ \;
+        \nl \While{$\uncoloured$ $\ne$ $\emptyset$\mclabel{cloopoutstart}}{
+            \nl $\colourable$ $\gets$ $\uncoloured$ \;
+            \nl \While{$\colourable$ $\ne$ $\emptyset$\mclabel{cloopstart}}{
+                \nl $v$ $\gets$ the first vertex of $\colourable$ \mclabel{cv} \;
+                \nl append $v$ to $\order$, and $\colour$ to $\bounds$ \mclabel{cgive} \;
+                \nl remove $v$ from $\uncoloured$ and from $\colourable$ \;
+                \nl remove from $\colourable$ all vertices adjacent to $v$
+                \mclabel{removeadjacent}\mclabel{cloopend} \;
+            }
+            \nl add $1$ to $\colour$ \mclabel{cnewcolour}\mclabel{cloopoutend}
+        }
+        \nl $\KwSty{return}$ ($\order$, $\bounds$) \;
+    }
+
+    \caption{A basic maximum clique algorithm.}
+    \label{algorithm:maxClique}
+\end{algorithm}
+
+\begin{figure}[p]
+    \centering
+    \begin{tikzpicture}
+        \newcount \myc
+        \foreach \n in {1, ..., 8}{
+            \myc=\n \advance\myc by -1 \multiply\myc by -360 \divide\myc by 8 \advance\myc by 90 \advance\myc by 22.5
+            \ifthenelse{\n = 1 \OR \n = 3}{
+                \node[vertexc1] (N\n) at (\the\myc:1.2) {\n};
+            }{}
+            \ifthenelse{\n = 2 \OR \n = 4 \OR \n = 8} {
+                \node[vertexc2] (N\n) at (\the\myc:1.2) {\n};
+            }{}
+            \ifthenelse{\n = 5 \OR \n = 7}{
+                \node[vertexc3] (N\n) at (\the\myc:1.2) {\n};
+            }{}
+            \ifthenelse{\n = 6}{
+                \node[vertexc4] (N\n) at (\the\myc:1.2) {\n};
+            }{}
+        }
+
+        \draw [edge] (N1) -- (N2);
+        \draw [edge] (N1) -- (N4);
+        \draw [edge] (N1) -- (N5);
+        \draw [edge] (N1) -- (N6);
+        \draw [edge] (N1) -- (N8);
+        \draw [edge] (N2) -- (N3);
+        \draw [edge] (N2) -- (N7);
+        \draw [edge] (N3) -- (N4);
+        \draw [edge] (N3) -- (N5);
+        \draw [edge] (N3) -- (N7);
+        \draw [edge] (N4) -- (N5);
+        \draw [edge] (N4) -- (N6);
+        \draw [edge] (N5) -- (N6);
+        \draw [edge] (N7) -- (N8);
+
+        \draw [processarrow] (1.6, 0) -> (2.7, 0);
+
+        \coordinate (Ms) at (4.3, 0.35);
+        \node[right = 0.0 of Ms, vertexc1] (M1) {1};
+        \node[right = 0.2 of M1, vertexc1] (M2) {3};
+        \node[right = 0.2 of M2, vertexc2] (M3) {2};
+        \node[right = 0.2 of M3, vertexc2] (M4) {4};
+        \node[right = 0.2 of M4, vertexc2] (M5) {8};
+        \node[right = 0.2 of M5, vertexc3] (M6) {5};
+        \node[right = 0.2 of M6, vertexc3] (M7) {7};
+        \node[right = 0.2 of M7, vertexc4] (M8) {6};
+
+        \node[left = 0.2 of M1, label] {$\order$:};
+        \draw[brace] ($(M1.north west)+(0.0,0.3)$) -- ($(M8.north east)+(0.0,0.3)$);
+        \node[anchor=south, label] at ($(M1)!0.5!(M8)$)[yshift=0.7cm] { Vertices in colour order };
+
+        \coordinate (Bs) at (4.3, -0.35);
+        \node[right = 0.0 of Bs, notvertex] (B1) {1};
+        \node[right = 0.2 of B1, notvertex] (B2) {1};
+        \node[right = 0.2 of B2, notvertex] (B3) {2};
+        \node[right = 0.2 of B3, notvertex] (B4) {2};
+        \node[right = 0.2 of B4, notvertex] (B5) {2};
+        \node[right = 0.2 of B5, notvertex] (B6) {3};
+        \node[right = 0.2 of B6, notvertex] (B7) {3};
+        \node[right = 0.2 of B7, notvertex] (B8) {4};
+
+        \node[left = 0.2 of B1, label] {$\bounds$:};
+        \draw[brace] ($(B8.south east)+(0.0,-0.2)$) -- ($(B1.south west)+(0.0,-0.2)$);
+        \node[anchor=north, label] at ($(B1)!0.5!(B8)$)[yshift=-0.6cm] { Number of colours used };
+    \end{tikzpicture}
+
+    \caption[How the $\colourOrder$ function works]{How the $\colourOrder$ function works. The graph
+        on the left has been coloured greedily: vertices 1 and 3 were given the first colour, then
+        vertices 2, 4 then 8 were given the second colour, then vertices 5 and 7 were given the
+        third colour, then vertex 6 was given the fourth colour. On the right, we show the $\order$
+        array, which contains the vertices in the order which they were coloured. Below, the $\bounds$
+        array, containing the number of colours used so far.}
+    \label{figure:colourOrder}
+\end{figure}
+
+\section{Thread Parallelism}
+
+To make use of multi-core processors, one option is to just use threads to speed up the bit
+parallelism. However, this would require considerable synchronisation, and we have not seen this
+done successfully. Another option, which has been implemented independently at least twice
+\cite{McCreesh:2013,Depolli:2013,McCreesh:2014.parallel}, is to use threads to do the search in
+parallel. Here is how: we can view the recursive calls to $\expand$ as forming a tree. We can then
+explore different parts of this tree in parallel, ignoring the left-to-right dependency. There are
+at least three issues which must be addressed for this approach.
+
+\paragraph{Sharing the incumbent} The $\Cbest$ variable must be shared between every thread.  One
+thread could find a good solution quickly, which would allow a lot of the search space to be
+eliminated due to the bound, but if other threads do not know this, they will be doing wasted work.
+In the worst case, this can lead to an overall slowdown.
+
+\paragraph{Work balance versus overhead} Published implementations of these algorithms can make
+around $10^6$ recursive calls to $\expand$ per second (and this time is dominated by the colouring
+step); standard benchmark problems can take between $10^6$ and $10^{10}$ recursive calls to solve.
+Thus it may not be feasible, from an overhead perspective, to treat every single recursive call as a
+potential parallel task.
+
+On the other hand, subproblems can be of vastly different sizes, so splitting into a few large tasks
+might not give a good enough balance. One approach, which works reasonably well for most (but not
+all) benchmark instances for modest numbers of cores, is to treat a subtree as a potential
+subproblem only if $|C| = 1$. If these subproblems are allocated dynamically, the irregularity
+usually (but not always) sorts itself out \cite{Regin:2013,Depolli:2013,McCreesh:2013}.
+
+\paragraph{Search order} It is important to prioritise subproblems, so that subtrees are explored in
+roughly the same order as they would be sequentially---otherwise, it is possible that a parallel
+implementation could spend all its time exploring parts of the search tree that would have been
+eliminated in the sequential run \cite{Trienekens:1990,deBruin:1995}.  There is also an interaction
+between work balance and diversity in search: improving the work balance but changing the search
+order can give substantially worse speedups in some circumstances.  We have discussed this issue in
+more depth elsewhere \cite{McCreesh:2014.parallel}.
+
+\section{Testing and Benchmarking}
+
+There are two standard benchmark suites used for testing maximum clique algorithms.  The first comes
+from the Second DIMACS Implementation
+Challenge\footnote{\url{http://dimacs.rutgers.edu/Challenges/}}. These graphs vary wildly in their
+complexity. As a rough guide:
+
+\paragraph{The ``brock'' family} These are due to Brockington and Culberson
+\cite{Brockington:1996}. They are an attempt at camouflaging a known clique in a quasi-random graph
+for cryptographic purposes, in a way that was resistant to certain early heuristic attacks.  There
+are three subfamilies, ``brock200'', ``brock400'' and ``brock800''; the number denotes the number of
+vertices in the graphs. Roughly speaking, for a good sequential exact maximum clique algorithm on modern
+hardware, members of the ``brock200'' family can be solved in a second, the ``brock400'' family take
+a few minutes, and the ``brock800'' family take around an hour.  In each case, there is a unique
+maximum clique in these graphs, and the clique is larger than one would expect from a random graph
+with the same density---this has interesting implications for parallel search.
+
+\paragraph{The ``C'' family} These are random graphs. The ``.5'' family have all been solved,
+although ``C2000.5'' takes a day, and ``C4000.5'' takes a month. The ``.9'' graphs from 500 upwards
+are believed to be open problems; ``C125.9'' should take under a second, and ``C250.9'' should take
+under an hour.
+
+\paragraph{The ``DJSC'' family} ``DJSC500\_5'' should take a couple of seconds, and ``DSJC1000\_5''
+should take a few minutes.
+
+\paragraph{The ``c-fat'' family} These graphs are related to fault diagnosis for distributed
+systems \cite{Berman:1990}. All are computationally trivial.
+
+\paragraph{The ``gen'' and ``san'' families} The ``gen200'', ``san200'', ``sanr200'', ``san400'' and
+``san1000'' graphs should take a few seconds; some of the ``sanr400'' graphs take a bit longer. The
+``gen400'' graphs are extremely interesting from a parallelism perspective: once a solution has been
+found, the proof of optimality is short, but finding an optimal solution is difficult.
+
+\paragraph{The ``hamming'', ``johnson'' and ``keller'' families} These are all either too easy or
+too hard to be interesting (although all are solvable using special knowledge of the structure of
+the graphs \cite{Debroni:2011}).
+
+\paragraph{The ``MANN'' family} These are clique formulations of the Steiner triple problem, due to
+Mannino and Sassano \cite{Mannino:1995}. All have been solved: ``MANN\_a9'' and ``MANN\_a27'' are
+not challenging, and ``MANN\_a45'' takes minutes; ``MANN\_a81'' was first solved as a general
+maximum clique problem by the author and Prosser \cite{McCreesh:2013} in 31 days using 24 hardware
+threads (although the solution was already known by other means). These graphs are very dense, which
+sometimes gives atypical behaviour from algorithms. In particular, getting good work balance for
+these graphs can be challenging.
+
+\paragraph{The ``p\_hat'' family} These are random graphs with an unusually large degree spread,
+created using the $\hat{p}$ generator by Soriano and Gendreau \cite{Soriano:1996}. The largest and
+densest of these, ``p\_hat1500-3'', was first solved by the author and Prosser \cite{McCreesh:2013}
+in 128 days using 32 hardware threads; ``p\_hat1000-3'' also takes multiple days to solve, but the
+remainder of the graphs should take between a second and an hour.
+
+\bigskip
+
+\noindent Other interesting datasets include:
+
+\paragraph{Benchmarks with Hidden Optimum Solutions for Graph Problems}
+BHOSLIB\footnote{\url{http://www.nlsde.buaa.edu.cn/~kexu/benchmarks/graph-benchmarks.htm}} is a
+collection of problem instances which are designed to be very hard to solve. Members of the
+``frb30'' family should be solvable in under an hour, and the ``frb35'' family within a couple of
+days.
+
+\paragraph{Erd\H{o}s collaboration graphs} The Pajek
+dataset\footnote{\url{http://vlado.fmf.uni-lj.si/pub/networks/data/}} includes larger, sparser
+graphs. The Erd\H{o}s collaboration graphs are not computationally challenging, but do show how well
+these algorithms can do on larger datasets.
+
+\subsection{File Formats}
+
+Except for the Erdos collaboration graphs, all of the standard benchmarks are in the ``DIMACS 2''
+format. A simple graph looks like this:
+
+\begin{verbatim}
+    c This is a comment.
+    c This graph looks a bit like a house.
+    p edge 5 6
+    e 1 2
+    e 1 4
+    e 1 5
+    e 2 3
+    e 3 4
+    e 4 5
+\end{verbatim}
+
+Any ``c'' lines or blank lines are to be ignored.  There is a single ``p edge $v$ $e$'' line, where
+$v$ is the number of vertices, and $e$ is the total number of edges in the graph (the $e$ figure is
+sometimes omitted, wrong, or set to 0, so it is recommended to ignore this). Vertices are named $1$
+to $v$.
+
+For each edge, there is a line ``e $v_1$ $v_2$'', specifying that $v_1$ and $v_2$ are adjacent. Some
+files specify edges in both directions, and some do not---either way, the graph is not directed.  It
+can be assume that the first non-comment line is a ``p'' line, so the number of vertices is known
+before any edges are specified.
+
+\subsection{Verifying Sequential Code and Solutions}
+
+One way to verify a sequential implementation is to count the number of calls made to
+$\colourOrder$, and compare it to another implementation, such as the
+code\footnote{\url{http://www.dcs.gla.ac.uk/~pat/maxClique/distribution/}} from Prosser's
+computational study \cite{Prosser:2012}. (This assumes that for the initial ordering, tie-breaking
+is done on vertex number; if this is done, our algorithm is Prosser's ``MCSa1''.) We have found that
+doing this is extremely useful in catching the kinds of bugs where the implementation still gives
+the right answer most of the time, but for the wrong reasons.
+
+\FloatBarrier
+\bibliographystyle{amsplain}
+\bibliography{max_clique_tutorial}
+
+\end{document}
+
