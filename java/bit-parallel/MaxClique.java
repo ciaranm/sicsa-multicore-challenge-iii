@@ -1,4 +1,6 @@
 /*
+ * Author: Ciaran McCreesh, based upon code by Patrick Prosser
+ *
  * Bit-parallel implementation of the max clique algorithm described in:
  *
  *     "Algorithms for the Maximum Clique Problem, and How to Parallelise

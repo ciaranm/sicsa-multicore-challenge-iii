@@ -1,6 +1,8 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
 /*
+ * Author: Ciaran McCreesh
+ *
  * Voodoo haxxed C++ sequential implementation of the max clique algorithm
  * described in:
  *
