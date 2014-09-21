@@ -44,6 +44,7 @@
 #include <map>
 #include <set>
 #include <regex>
+#include <algorithm>
 
 namespace
 {
