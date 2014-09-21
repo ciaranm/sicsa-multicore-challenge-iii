@@ -46,6 +46,7 @@
 #include <regex>
 #include <algorithm>
 #include <numeric>
+#include <array>
 
 namespace
 {
