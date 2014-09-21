@@ -45,6 +45,7 @@
 #include <set>
 #include <regex>
 #include <algorithm>
+#include <numeric>
 
 namespace
 {
