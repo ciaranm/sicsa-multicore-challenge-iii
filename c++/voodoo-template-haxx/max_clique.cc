@@ -23,7 +23,7 @@
  *
  * Compile like this:
  *
- *     g++-4.9 -O3 -march=native -o max_clique -std=c++11 max_clique.cc
+ *     g++-4.9 -O3 -march=native -o max_clique -std=c++14 max_clique.cc
  *
  * Run like this:
  *
@@ -107,13 +107,13 @@ namespace
                 if (0 != result.first)
                     throw SomethingWentWrong{ "multiple 'p' lines encountered" };
                 result.first = std::stoi(match.str(2));
-                for (int i = 0 ; i < result.first ; ++i)
+                for (unsigned i = 0 ; i < result.first ; ++i)
                     result.second[i];
             }
             else if (regex_match(line, match, edge)) {
                 /* An edge. DIMACS files are 1-indexed. We assume we've already had
                  * a problem line (if not our size will be 0, so we'll throw). */
-                int a{ std::stoi(match.str(1)) }, b{ std::stoi(match.str(2)) };
+                unsigned long a{ std::stoul(match.str(1)) }, b{ std::stoul(match.str(2)) };
                 if (0 == a || 0 == b || a > result.first || b > result.first)
                     throw SomethingWentWrong{ "line '" + line + "' edge index out of bounds" };
                 else if (a == b)
@@ -312,8 +312,8 @@ namespace
             // re-encode graph as a bit graph
             graph.resize(g.first);
 
-            for (int i = 0 ; i < g.first ; ++i)
-                for (int j = 0 ; j < g.first ; ++j)
+            for (unsigned i = 0 ; i < g.first ; ++i)
+                for (unsigned j = 0 ; j < g.first ; ++j)
                     if (g.second.find(order[i])->second.count(order[j]))
                         graph.add_edge(i, j);
         }
@@ -400,6 +400,7 @@ namespace
         auto run() -> MaxCliqueResult
         {
             result.size = 0;
+            result.n_colourings = 0;
 
             std::vector<unsigned> c;
             c.reserve(graph.size());
