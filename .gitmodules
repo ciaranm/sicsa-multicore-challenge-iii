@@ -1,0 +1,3 @@
+[submodule "ios-max-clique"]
+	path = ios-max-clique
+	url = git@github.com:magnusmorton/ios-max-clique.git
